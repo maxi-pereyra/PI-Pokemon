@@ -1,7 +1,29 @@
 const axios = require('axios');
 const URL = 'https://pokeapi.co/api/v2/pokemon';
+const {Pokemon,Types} = require('./getPokemonFromDb');
 
 const getPokemonById = async (id) => {
+
+    if(isNaN(id)){
+        const pokemonDB = await Pokemon.findByPk(id,{include:[Types]});
+        if(!pokemonDB) throw new Error(`No se encuentra el pokemon con el ${id} en la base de datos`);
+
+        const pokemon = pokemonDB.toJSON();
+        const types = pokemon.Types.map((type)=> type.name)
+
+        return {
+            id: pokemon.id,
+            name: pokemon.name,
+            image: pokemon.image,
+            life: pokemon.life,
+            attack: pokemon.attack,
+            defense: pokemon.defense,
+            speed: pokemon.speed,
+            height: pokemon.height,
+            weight: pokemon.weight,
+            types: types
+        }
+    }
 
     const pokemonApi = (await axios.get(`${URL}/${id}`)).data;
     if(!pokemonApi) throw new Error(`No se encuentra el perro con el id: ${id} en la api`);
